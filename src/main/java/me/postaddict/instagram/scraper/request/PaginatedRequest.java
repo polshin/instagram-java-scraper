@@ -21,7 +21,7 @@ public abstract class PaginatedRequest<R, P extends RequestParameter> {
     protected abstract void updateResult(R result, R current);
     protected abstract PageInfo getPageInfo(R current);
     protected abstract R mapResponse(InputStream jsonStream);
-    private final OkHttpClient httpClient;
+    public final OkHttpClient httpClient;
     @Getter(AccessLevel.PROTECTED)
     private final Mapper mapper;
     private final DelayHandler delayHandler;

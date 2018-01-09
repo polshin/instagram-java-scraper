@@ -1,5 +1,5 @@
 group 'me.postaddict.instagramscraper'
-version '0.0.1'
+version '0.1.15'
 
 apply plugin: 'java'
 
@@ -16,10 +16,12 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.2'
     compile 'com.github.igor-suhorukov:dom-transformation:1.1'
     compile 'commons-io:commons-io:2.6'
+    compile 'com.google.code.gson:gson:2.7'
     compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
     compile 'org.eclipse.persistence:org.eclipse.persistence.moxy:2.7.0'
     compile 'commons-beanutils:commons-beanutils:1.9.3'
     compileOnly 'org.projectlombok:lombok:1.16.18'
     testCompile 'junit:junit:4.11'
     testCompile 'org.assertj:assertj-core:3.8.0'
+
 }

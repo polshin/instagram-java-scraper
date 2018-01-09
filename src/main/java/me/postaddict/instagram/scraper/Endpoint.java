@@ -9,7 +9,8 @@ public class Endpoint {
     public static final String LOGIN_URL = "https://www.instagram.com/accounts/login/ajax/";
     public static final String ACCOUNT_PAGE = "https://www.instagram.com/{{username}}";
     public static final String MEDIA_LINK = "https://www.instagram.com/p/{{code}}";
-    public static final String ACCOUNT_MEDIAS = "https://www.instagram.com/{{username}}/?__a=1&max_id={{maxId}}";
+    public static final String ACCOUNT_MEDIAS = "https://www.instagram.com/{{username}}/media?max_id={{maxId}}";
+    public static final String ACCOUNT_JSON_INFO = "https://www.instagram.com/{{username}}/?__a=1";
     public static final String TAG_JSON_INFO = "https://www.instagram.com/explore/tags/{{tag_name}}/?__a=1";
     public static final String MEDIA_JSON_INFO = "https://www.instagram.com/p/{{code}}/?__a=1";
     public static final String MEDIA_JSON_BY_LOCATION_ID = "https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}";
@@ -43,79 +44,81 @@ public class Endpoint {
     public static final String TAG = "{{tag}}";
     public static final String QUERY = "{{query}}";
     public static final String FACEBOOK_LOCATION_ID = "{{facebookLocationId}}";
+    public static final String INSTAGRAM_QUERY_URL = "https://www.instagram.com/query/";
+    public static final String INSTAGRAM_CDN_URL = "https://scontent.cdninstagram.com/";
 
     public static String getAccountPageLink(String username) {
-        return ACCOUNT_PAGE.replace(USERNAME, username);
+        return ACCOUNT_PAGE.replace("{{username}}", username);
+    }
+
+    public static String getAccountJsonInfoLinkByUsername(String username) {
+        return ACCOUNT_JSON_INFO.replace("{{username}}", username);
     }
 
     public static String getAccountJsonInfoLinkByAccountId(long userId) {
-        return ACCOUNT_JSON_INFO_BY_ID.replace(USER_ID, "" + userId);
+        return ACCOUNT_JSON_INFO_BY_ID.replace("{{userId}}", "" + userId);
     }
 
     public static String getAccountMediasJsonLink(String username, String maxId) {
         if (maxId == null) {
             maxId = "";
         }
-        return ACCOUNT_MEDIAS.replace(USERNAME, username).replace(MAX_ID, maxId);
+        return ACCOUNT_MEDIAS.replace("{{username}}", username).replace("{{maxId}}", maxId);
     }
 
     public static String getTagJsonByTagName(String tagName) {
-        return TAG_JSON_INFO.replace(TAG_NAME, tagName);
+        return TAG_JSON_INFO.replace("{{tag_name}}", tagName);
     }
 
     public static String getMediaPageLinkByCode(String code) {
-        return MEDIA_LINK.replace(CODE, code);
-    }
-
-    public static String getMediaPageLinkByCodeMatcher() {
-        return MEDIA_LINK.replace(CODE, "[\\w-_]+");
+        return MEDIA_LINK.replace("{{code}}", code);
     }
 
     public static String getMediaJsonLinkByShortcode(String shortcode) {
-        return MEDIA_JSON_INFO.replace(CODE, shortcode);
+        return MEDIA_JSON_INFO.replace("{{code}}", shortcode);
     }
 
     public static String getMediasJsonByLocationIdLink(String facebookLocationId, String maxId) {
         if (maxId == null) {
             maxId = "";
         }
-        return MEDIA_JSON_BY_LOCATION_ID.replace(FACEBOOK_LOCATION_ID, facebookLocationId).replace(MAX_ID, maxId);
+        return MEDIA_JSON_BY_LOCATION_ID.replace("{{facebookLocationId}}", facebookLocationId).replace("{{maxId}}", maxId);
     }
 
     public static String getMediasJsonByTagLink(String tag, String maxId) {
         if (maxId == null) {
             maxId = "";
         }
-        return MEDIA_JSON_BY_TAG.replace(TAG, tag).replace(MAX_ID, maxId);
+        return MEDIA_JSON_BY_TAG.replace("{{tag}}", tag).replace("{{maxId}}", maxId);
     }
 
     public static String getGeneralSearchJsonLink(String query) {
-        return GENERAL_SEARCH.replace(QUERY, query);
+        return GENERAL_SEARCH.replace("{{query}}", query);
     }
 
     public static String getLastCommentsByCodeLink(String code, int count) {
         return LAST_COMMENTS_BY_CODE
-                .replace(CODE, code)
-                .replace(COUNT, "" + count);
+                .replace("{{code}}", code)
+                .replace("{{count}}", "" + count);
     }
 
     public static String getCommentsBeforeCommentIdByCode(String shortcode, int count, String commentId) {
         return COMMENTS_BEFORE_COMMENT_ID_BY_CODE
-                .replace(SHORTCODE, shortcode)
-                .replace(COUNT, "" + count)
-                .replace(COMMENT_ID, commentId);
+                .replace("{{shortcode}}", shortcode)
+                .replace("{{count}}", "" + count)
+                .replace("{{commentId}}", commentId);
     }
 
     public static String getMediaLikeLink(String mediaId) {
-        return MEDIA_LIKE.replace(MEDIA_ID, mediaId);
+        return MEDIA_LIKE.replace("{{mediaId}}", mediaId);
     }
 
     public static String getMediaUnlikeLink(String mediaId) {
-        return MEDIA_UNLIKE.replace(MEDIA_ID, mediaId);
+        return MEDIA_UNLIKE.replace("{{mediaId}}", mediaId);
     }
 
     public static String addMediaCommentLink(String mediaId) {
-        return MEDIA_COMMENTS_ADD.replace(MEDIA_ID, mediaId);
+        return MEDIA_COMMENTS_ADD.replace("{{mediaId}}", mediaId);
     }
 
     public static String deleteMediaCommentLink(String mediaId, String commentId) {
@@ -135,12 +138,12 @@ public class Endpoint {
         return FOLLOW_ACCOUNT
                 .replace(USER_ID, String.valueOf(userId));
     }
-    
+
     public static String getUnfollowAccountLink(long userId) {
         return UNFOLLOW_ACCOUNT
                 .replace(USER_ID, String.valueOf(userId));
     }
-    
+
     public static String getFollowsLinkVariables(long userId, int count, String endCursor) {
         return FOLLOWS_URL
                 .replace(USER_ID, String.valueOf(userId))
