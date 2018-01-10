@@ -1,5 +1,6 @@
 package me.postaddict.instagram.scraper.domain;
 
+import com.google.gson.internal.LinkedTreeMap;
 import me.postaddict.instagram.scraper.Endpoint;
 
 import java.net.MalformedURLException;
@@ -176,43 +177,74 @@ public class Media {
 
     public static Media fromTagPage(Map mediaMap) {
         Media instance = new Media();
-        instance.shortcode = (String) mediaMap.get("code");
+        if (mediaMap.get("code")!=null) {
+            instance.shortcode = (String) mediaMap.get("code");
+        } else {
+            instance.shortcode = (String) mediaMap.get("shortcode");
+        }
         instance.link = Endpoint.getMediaPageLinkByCode(instance.shortcode);
-        instance.commentsCount = ((Double) ((Map) mediaMap.get("comments")).get("count")).intValue();
-        instance.likesCount = ((Double) ((Map) mediaMap.get("likes")).get("count")).intValue();
+        if (mediaMap.get("edge_media_to_comment")!=null) {
+            instance.commentsCount = ((Double) ((Map) mediaMap.get("edge_media_to_comment")).get("count")).intValue();
+        } else {
+            instance.commentsCount = ((Double) ((Map) mediaMap.get("comments")).get("count")).intValue();
+        }
+        if (mediaMap.get("edge_liked_by")!=null) {
+            instance.likesCount = ((Double) ((Map) mediaMap.get("edge_liked_by")).get("count")).intValue();
+        } else {
+            instance.likesCount = ((Double) ((Map) mediaMap.get("likes")).get("count")).intValue();
+        }
         instance.ownerId = (String) ((Map) mediaMap.get("owner")).get("id");
+        if (mediaMap.get("edge_media_to_caption") != null) {
+            instance.caption = ((Map)((Map)((List)((LinkedTreeMap)mediaMap.get("edge_media_to_caption")).get("edges")).get(0)).get("node")).get("text").toString();
+        }
         if (mediaMap.get("caption") != null) {
             instance.caption = (String) mediaMap.get("caption");
         }
-        instance.createdTime = ((Double) mediaMap.get("date")).longValue();
+        if (mediaMap.get("date")!=null) {
+            instance.createdTime = ((Double) mediaMap.get("date")).longValue();
+        } else if (mediaMap.get("taken_at_timestamp")!=null) {
+            instance.createdTime = ((Double) mediaMap.get("taken_at_timestamp")).longValue();
+        }
         fixDate(instance);
-        fillImageUrls(instance, (String) mediaMap.get("display_src"));
-        instance.type = TYPE_IMAGE;
-        if ((Boolean) mediaMap.get("is_video")) {
-            instance.type = TYPE_VIDEO;
-            instance.videoViews = ((Double) mediaMap.get("video_views")).intValue();
-        }
-        if(mediaMap.containsKey("carousel_media")){
-        	instance.type = TYPE_CAROUSEL;
-        	instance.carouselMedia = new ArrayList<CarouselMedia>();
-        	for(Map<String, Object> carouselMap : ((List<Map>) mediaMap.get("carousel_media"))){
-        		CarouselMedia carouselMedia = new CarouselMedia();
-        		carouselMedia.type = (String) carouselMap.get("type");
-        		
-        		if(carouselMap.containsKey("images")){
-        			Map carouselImages = (Map) carouselMap.get("images");
-        	        fillCarouselImageUrls(carouselMedia, (String)((Map)carouselImages.get("standard_resolution")).get("url"));
-        		}
-        		if (carouselMedia.type.equals(TYPE_VIDEO) && carouselMap.containsKey("videos")) {
-                    Map carouselVideos = (Map) carouselMap.get("videos");
-                    carouselMedia.videoUrls.low = (String) ((Map) carouselVideos.get("low_resolution")).get("url");
-                    carouselMedia.videoUrls.standard = (String) ((Map) carouselVideos.get("standard_resolution")).get("url");
-                    carouselMedia.videoUrls.lowBandwidth = (String) ((Map) carouselVideos.get("low_bandwidth")).get("url");
+        try {
+            if (mediaMap.get("display_src")!=null) {
+                fillImageUrls(instance, (String) mediaMap.get("display_src"));
+            } else if (mediaMap.get("display_url")!=null) {
+                fillImageUrls(instance, (String) mediaMap.get("display_url"));
+            }
+            instance.type = TYPE_IMAGE;
+            if ((Boolean) mediaMap.get("is_video")) {
+                instance.type = TYPE_VIDEO;
+                if (mediaMap.get("video_view_count")!=null) {
+                    instance.videoViews = ((Double) mediaMap.get("video_view_count")).intValue();
+                } else if (mediaMap.get("video_views")!=null) {
+                    instance.videoViews = ((Double) mediaMap.get("video_views")).intValue();
                 }
-        		instance.carouselMedia.add(carouselMedia);
-        	}
+            }
+            if (mediaMap.containsKey("carousel_media")) {
+                instance.type = TYPE_CAROUSEL;
+                instance.carouselMedia = new ArrayList<CarouselMedia>();
+                for (Map<String, Object> carouselMap : ((List<Map>) mediaMap.get("carousel_media"))) {
+                    CarouselMedia carouselMedia = new CarouselMedia();
+                    carouselMedia.type = (String) carouselMap.get("type");
+
+                    if (carouselMap.containsKey("images")) {
+                        Map carouselImages = (Map) carouselMap.get("images");
+                        fillCarouselImageUrls(carouselMedia, (String) ((Map) carouselImages.get("standard_resolution")).get("url"));
+                    }
+                    if (carouselMedia.type.equals(TYPE_VIDEO) && carouselMap.containsKey("videos")) {
+                        Map carouselVideos = (Map) carouselMap.get("videos");
+                        carouselMedia.videoUrls.low = (String) ((Map) carouselVideos.get("low_resolution")).get("url");
+                        carouselMedia.videoUrls.standard = (String) ((Map) carouselVideos.get("standard_resolution")).get("url");
+                        carouselMedia.videoUrls.lowBandwidth = (String) ((Map) carouselVideos.get("low_bandwidth")).get("url");
+                    }
+                    instance.carouselMedia.add(carouselMedia);
+                }
+            }
+            instance.id = (String) mediaMap.get("id");
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        instance.id = (String) mediaMap.get("id");
         return instance;
     }
 

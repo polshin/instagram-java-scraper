@@ -243,9 +243,10 @@ public class Instagram implements AuthenticatedInsta {
         response.body().close();
 
         Map tagMap = gson.fromJson(jsonString, Map.class);
-        List nodes = (List) ((Map) ((Map) tagMap.get("tag")).get("top_posts")).get("nodes");
+        List nodes = (List)((Map)((Map)((Map)tagMap.get("graphql")).get("hashtag")).get("edge_hashtag_to_top_posts")).get("edges");
+        //List nodes = (List) ((Map) ((Map) tagMap.get("tag")).get("top_posts")).get("nodes");
         for (Object node : nodes) {
-            Map mediaMap = (Map) node;
+            Map mediaMap = (Map)((Map) node).get("node");
             Media media = Media.fromTagPage(mediaMap);
             medias.add(media);
         }
