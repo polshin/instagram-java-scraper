@@ -2,6 +2,7 @@ package me.postaddict.instagram.scraper.domain;
 
 import com.google.gson.internal.LinkedTreeMap;
 import me.postaddict.instagram.scraper.Endpoint;
+import org.apache.commons.collections.MapUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -167,9 +168,17 @@ public class Media {
         instance.commentsCount = ((Double)((Map) pageMap.get("edge_media_to_comment")).get("count")).intValue();
         instance.likesCount = ((Double)((Map) pageMap.get("edge_media_preview_like")).get("count")).intValue();
         fillImageUrls(instance, (String) pageMap.get("display_url"));
-        String caption = (String)((Map)((Map)((List)((Map)pageMap.get("edge_media_to_caption")).get("edges")).get(0)).get("node")).get("text");
-        if (caption != null) {
-            instance.caption = caption;
+        try {
+            if (((List)((Map)pageMap.get("edge_media_to_caption")).get("edges")).size()!=0) {
+                String caption = (String) ((Map) ((Map) ((List) ((Map) pageMap.get("edge_media_to_caption")).get("edges")).get(0)).get("node")).get("text");
+                if (caption != null) {
+                    instance.caption = caption;
+                }
+            } else {
+                System.out.print("NO TEXT "+instance.link);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         instance.owner = Account.fromMediaPage((Map) pageMap.get("owner"));
         return instance;
@@ -195,7 +204,15 @@ public class Media {
         }
         instance.ownerId = (String) ((Map) mediaMap.get("owner")).get("id");
         if (mediaMap.get("edge_media_to_caption") != null) {
-            instance.caption = ((Map)((Map)((List)((LinkedTreeMap)mediaMap.get("edge_media_to_caption")).get("edges")).get(0)).get("node")).get("text").toString();
+            try {
+                instance.caption = ((Map) ((Map) ((List) ((LinkedTreeMap) mediaMap.get("edge_media_to_caption")).get("edges")).get(0)).get("node")).get("text").toString();
+            } catch (Exception ex) {
+                System.out.print("ERROR");
+                System.out.print(mediaMap);
+                try {
+                    MapUtils.debugPrint(System.out, "PostMap", mediaMap);
+                } catch (Exception ignore) {}
+            }
         }
         if (mediaMap.get("caption") != null) {
             instance.caption = (String) mediaMap.get("caption");

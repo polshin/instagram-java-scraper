@@ -3,6 +3,7 @@ package me.postaddict.instagram.scraper.interceptor;
 import me.postaddict.instagram.scraper.exception.InstagramAuthException;
 import me.postaddict.instagram.scraper.exception.InstagramException;
 import me.postaddict.instagram.scraper.exception.InstagramNotFoundException;
+import me.postaddict.instagram.scraper.exception.InstagramTooManyRequests;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
@@ -21,6 +22,8 @@ public class ErrorInterceptor implements Interceptor {
         }
 
         switch (code) {
+            case 429:
+                throw new InstagramTooManyRequests("Instagram too many requests ");
             case 401:
                 throw new InstagramAuthException("Unauthorized");
             case 403:
